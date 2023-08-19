@@ -1,9 +1,10 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 import "./login.scss";
 
 const Login = () => {
+  const navigate = useNavigate()
   const { login } = useContext(AuthContext);
   const [err, setErr] = useState(null)
   const [inputs, setInputs] = useState({
@@ -17,6 +18,7 @@ const Login = () => {
     e.preventDefault()
     try {
       await login(inputs);
+      navigate('/')
     } catch(err) {
       setErr(err.response.data)
       // console.log("inside login",err)
