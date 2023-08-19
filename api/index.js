@@ -7,6 +7,7 @@ import authRouter from './routes/auth.js'
 import cmtRouter from './routes/comments.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import multer from 'multer'
 
 //middlewares
 app.use((req, res, next) => {
@@ -21,6 +22,22 @@ const corsOptions ={
 }
 app.use(cors(corsOptions));
 app.use(cookieParser())
+
+// we can put storage code into seprate file(optional)
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, '../client/public/upload')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + file.originalname)
+    }
+})
+  
+const upload = multer({ storage: storage })
+app.post('/api/upload', upload.single('file'), (req, res) => {
+    const file = req.file
+    return res.status(200).json(file.filename)
+})
 
 app.use('/api/users', userRouter)
 app.use('/api/posts', postRouter)
