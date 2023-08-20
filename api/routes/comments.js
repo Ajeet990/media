@@ -1,7 +1,7 @@
 import Express from "express";
 const router = Express.Router()
-import {  } from "../controllers/cmtController.js";
+import { getComments } from "../controllers/cmtController.js";
 
-router.get('/test', )
+router.get('/', getComments)
 
 export default router
