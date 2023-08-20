@@ -4,14 +4,14 @@ import Map from "../../assets/map.png";
 import Friend from "../../assets/friend.png";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../context/authContext";
-import { useMutation,useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { makeRequest } from "../../axios";
 const Share = () => {
   const [description, setDescription] = useState("")
   const [file, setFile] = useState(null)
 
   const upload = async () => {
-    try{
+    try {
       const formData = new FormData()
       formData.append('file', file)
       const res = await makeRequest.post('/upload', formData);
@@ -21,7 +21,7 @@ const Share = () => {
     }
   }
 
-  const {currentUser} = useContext(AuthContext)
+  const { currentUser } = useContext(AuthContext)
 
   const queryClient = new useQueryClient()
   const mutation = useMutation({
@@ -37,22 +37,29 @@ const Share = () => {
     e.preventDefault();
     let imgUrl = "";
     if (file) imgUrl = await upload(file)
-    mutation.mutate({description, img:imgUrl})
+    mutation.mutate({ description, img: imgUrl })
+    setDescription("")
+    setFile(null)
   }
   return (
     <div className="share">
       <div className="container">
         <div className="top">
-          <img
-            src={currentUser.profilePic}
-            alt=""
-          />
-          <input type="text" placeholder={`What's on your mind ${currentUser.name}?`} onChange={(e)=>setDescription(e.target.value)}/>
+          <div className="left">
+            <img
+              src={currentUser.profilePic}
+              alt=""
+            />
+            <input type="text" value={description} placeholder={`What's on your mind ${currentUser.name}?`} onChange={(e) => setDescription(e.target.value)} />
+          </div>
+          <div className="right">
+            {file && <img className="file" src={URL.createObjectURL(file)} />}
+          </div>
         </div>
         <hr />
         <div className="bottom">
           <div className="left">
-            <input type="file" id="file" style={{display:"none"}} onChange={(e)=>setFile(e.target.files[0])}/>
+            <input type="file" id="file" style={{ display: "none" }} onChange={(e) => setFile(e.target.files[0])} />
             <label htmlFor="file">
               <div className="item">
                 <img src={Image} alt="" />
