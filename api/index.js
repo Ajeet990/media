@@ -5,6 +5,7 @@ import postRouter from './routes/posts.js'
 import likeRouter from './routes/likes.js'
 import authRouter from './routes/auth.js'
 import cmtRouter from './routes/comments.js'
+import relationRouter from './routes/relation.js'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import multer from 'multer'
@@ -44,6 +45,7 @@ app.use('/api/posts', postRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/likes', likeRouter)
 app.use('/api/cmt', cmtRouter)
+app.use('/api/relation', relationRouter)
 
 app.listen(8800, () => {
     console.log(`Server running at 8800`)

@@ -14,16 +14,41 @@ import { useQuery } from '@tanstack/react-query'
 import { makeRequest } from "../../axios";
 import { useLocation } from "react-router-dom";
 import { useContext } from "react";
+import { AuthContext } from "../../context/authContext";
 
 const Profile = () => {
+  const { currentUser } = useContext(AuthContext)
   const userId = parseInt(useLocation().pathname.split("/")[2])
   const { isLoading, error, data } = useQuery({
     queryKey: ['profile'],
     queryFn: () =>
-      makeRequest.get('/users/find/'+userId).then((res) => {
+      makeRequest.get('/users/find/' + userId).then((res) => {
         return res.data;
       })
   })
+  const {isLoading:relationIsLoading, data:relationshipData } = useQuery({
+    queryKey: ['relationship'],
+    queryFn: () =>
+      makeRequest.get('/relation?followedUserId=' + userId).then((res) => {
+        return res.data;
+      })
+  })
+  const queryClient = new useQueryClient()
+  const mutation = useMutation({
+    mutationFn: (following) => {
+      if (following) return makeRequest.delete('/relation?userId='+userId)
+      return makeRequest.post('/relation', {userId})
+    },
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({ queryKey: ['relationship'] })
+    },
+  })
+
+  const handleFollow = () => {
+    mutation.mutate(relationshipData.includes(currentUser.id))
+
+  }
 
   return (
     <div className="profile">
@@ -39,46 +64,49 @@ const Profile = () => {
           className="profilePic"
         />
       </div>
-      <div className="profileContainer">
-        <div className="uInfo">
-          <div className="left">
-            <a href="http://facebook.com">
-              <FacebookTwoToneIcon fontSize="large" />
-            </a>
-            <a href="http://facebook.com">
-              <InstagramIcon fontSize="large" />
-            </a>
-            <a href="http://facebook.com">
-              <TwitterIcon fontSize="large" />
-            </a>
-            <a href="http://facebook.com">
-              <LinkedInIcon fontSize="large" />
-            </a>
-            <a href="http://facebook.com">
-              <PinterestIcon fontSize="large" />
-            </a>
-          </div>
-          <div className="center">
-            <span>{data.name}</span>
-            <div className="info">
-              <div className="item">
-                <PlaceIcon />
-                <span>{data.city}</span>
-              </div>
-              <div className="item">
-                <LanguageIcon />
-                <span>{data.website}</span>
-              </div>
+        <div className="profileContainer">
+          <div className="uInfo">
+            <div className="left">
+              <a href="http://facebook.com">
+                <FacebookTwoToneIcon fontSize="large" />
+              </a>
+              <a href="http://facebook.com">
+                <InstagramIcon fontSize="large" />
+              </a>
+              <a href="http://facebook.com">
+                <TwitterIcon fontSize="large" />
+              </a>
+              <a href="http://facebook.com">
+                <LinkedInIcon fontSize="large" />
+              </a>
+              <a href="http://facebook.com">
+                <PinterestIcon fontSize="large" />
+              </a>
             </div>
-            {(userId === data.id) ? (<button>Update</button>) : (<button>follow</button>)}
+            <div className="center">
+              <span>{data.name}</span>
+              <div className="info">
+                <div className="item">
+                  <PlaceIcon />
+                  <span>{data.city}</span>
+                </div>
+                <div className="item">
+                  <LanguageIcon />
+                  <span>{data.website}</span>
+                </div>
+              </div>
+              {relationIsLoading ? "Relation is loading..." : (userId === currentUser.id) ?
+                (<button>Update</button>) :
+                (<button onClick={handleFollow}>{relationshipData.includes(currentUser.id) ? "following" : "follow"}</button>)}
+                
+            </div>
+            <div className="right">
+              <EmailOutlinedIcon />
+              <MoreVertIcon />
+            </div>
           </div>
-          <div className="right">
-            <EmailOutlinedIcon />
-            <MoreVertIcon />
-          </div>
-        </div>
-      <Posts/>
-      </div></>}
+          <Posts />
+        </div></>}
     </div>
   );
 };
