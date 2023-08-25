@@ -56,9 +56,6 @@ export const deletePost = (req, res) => {
         if (err) return res.status(403).json("Token not verified")
 
         const q = "delete from posts where `id` = ? and `userId` = ?";
-        console.log(q)
-        console.log(userInfo.id)
-        console.log(req.param.postId)
         db.query(q, [ req.params.postId,userInfo.id ] , (err, data) => {
             if(err) return res.status(500).json(err)
             if (data.affectedRows > 0) return res.status(200).json("Post has been deleted")
