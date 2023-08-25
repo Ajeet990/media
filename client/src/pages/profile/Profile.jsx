@@ -13,10 +13,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useQuery } from '@tanstack/react-query'
 import { makeRequest } from "../../axios";
 import { useLocation } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../context/authContext";
+import  Updatee from "../../components/update/Updatee";
 
 const Profile = () => {
+  const [openUpdate, setOpenUpdate] = useState(false)
   const { currentUser } = useContext(AuthContext)
   const userId = parseInt(useLocation().pathname.split("/")[2])
   const { isLoading, error, data } = useQuery({
@@ -54,12 +56,12 @@ const Profile = () => {
     <div className="profile">
       {isLoading ? "loading..." : <><div className="images">
         <img
-          src={data.coverPic}
+          src={"/upload/"+data.coverPic}
           alt=""
           className="cover"
         />
         <img
-          src={data.profilePic}
+          src={"/upload/"+data.profilePic}
           alt=""
           className="profilePic"
         />
@@ -96,7 +98,7 @@ const Profile = () => {
                 </div>
               </div>
               {relationIsLoading ? "Relation is loading..." : (userId === currentUser.id) ?
-                (<button>Update</button>) :
+                (<button onClick={()=>setOpenUpdate(true)}>Update</button>) :
                 (<button onClick={handleFollow}>{relationshipData.includes(currentUser.id) ? "following" : "follow"}</button>)}
                 
             </div>
@@ -105,8 +107,9 @@ const Profile = () => {
               <MoreVertIcon />
             </div>
           </div>
-          <Posts />
+          <Posts userId={userId}/>
         </div></>}
+        { openUpdate && <Updatee setOpenUpdate={setOpenUpdate} user={data} />}
     </div>
   );
 };

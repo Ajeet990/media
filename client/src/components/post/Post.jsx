@@ -12,9 +12,11 @@ import { useQuery } from '@tanstack/react-query'
 import { makeRequest } from "../../axios";
 import { AuthContext } from "../../context/authContext";
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Button } from "@mui/material";
 const Post = ({ post }) => {
   const {currentUser} = useContext(AuthContext)
   const [commentOpen, setCommentOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const { isLoading, error, data } = useQuery({
     queryKey: ['likes', post.id],
     queryFn: () =>
@@ -36,6 +38,19 @@ const Post = ({ post }) => {
   })
   const handleLike = () => {
     mutation.mutate(data.includes(currentUser.id))
+  }
+
+  const deleteMutation = useMutation({
+    mutationFn:(postId) => {
+      return makeRequest.delete('/posts/'+postId)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey:["posts"]})
+    }
+  })
+
+  const handleDelete = () => {
+    deleteMutation.mutate(post.id)
 
   }
 
@@ -56,7 +71,8 @@ const Post = ({ post }) => {
               <span className="date">{moment(post.createdAt).fromNow()}</span>
             </div>
           </div>
-          <MoreHorizIcon />
+          <MoreHorizIcon onClick={()=>setMenuOpen(!menuOpen)}/>
+          {menuOpen  &&<Button variant="contained" onClick={handleDelete}>Delete</Button>}
         </div>
         <div className="content">
           <p>{post.description}</p>
